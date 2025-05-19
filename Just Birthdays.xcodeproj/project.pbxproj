@@ -1,0 +1,556 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		3BF50A252DDB4D910064B873 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3BF50A0E2DDB4D900064B873 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3BF50A152DDB4D900064B873;
+			remoteInfo = "Just Birthdays";
+		};
+		3BF50A2F2DDB4D910064B873 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3BF50A0E2DDB4D900064B873 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3BF50A152DDB4D900064B873;
+			remoteInfo = "Just Birthdays";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		3BF50A162DDB4D900064B873 /* Just Birthdays.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Just Birthdays.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BF50A242DDB4D910064B873 /* Just BirthdaysTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Just BirthdaysTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BF50A2E2DDB4D910064B873 /* Just BirthdaysUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Just BirthdaysUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3BF50A182DDB4D900064B873 /* Just Birthdays */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Just Birthdays";
+			sourceTree = "<group>";
+		};
+		3BF50A272DDB4D910064B873 /* Just BirthdaysTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Just BirthdaysTests";
+			sourceTree = "<group>";
+		};
+		3BF50A312DDB4D910064B873 /* Just BirthdaysUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Just BirthdaysUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3BF50A132DDB4D900064B873 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A212DDB4D910064B873 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A2B2DDB4D910064B873 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3BF50A0D2DDB4D900064B873 = {
+			isa = PBXGroup;
+			children = (
+				3BF50A182DDB4D900064B873 /* Just Birthdays */,
+				3BF50A272DDB4D910064B873 /* Just BirthdaysTests */,
+				3BF50A312DDB4D910064B873 /* Just BirthdaysUITests */,
+				3BF50A172DDB4D900064B873 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3BF50A172DDB4D900064B873 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3BF50A162DDB4D900064B873 /* Just Birthdays.app */,
+				3BF50A242DDB4D910064B873 /* Just BirthdaysTests.xctest */,
+				3BF50A2E2DDB4D910064B873 /* Just BirthdaysUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3BF50A152DDB4D900064B873 /* Just Birthdays */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF50A382DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just Birthdays" */;
+			buildPhases = (
+				3BF50A122DDB4D900064B873 /* Sources */,
+				3BF50A132DDB4D900064B873 /* Frameworks */,
+				3BF50A142DDB4D900064B873 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3BF50A182DDB4D900064B873 /* Just Birthdays */,
+			);
+			name = "Just Birthdays";
+			packageProductDependencies = (
+			);
+			productName = "Just Birthdays";
+			productReference = 3BF50A162DDB4D900064B873 /* Just Birthdays.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3BF50A232DDB4D910064B873 /* Just BirthdaysTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF50A3B2DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just BirthdaysTests" */;
+			buildPhases = (
+				3BF50A202DDB4D910064B873 /* Sources */,
+				3BF50A212DDB4D910064B873 /* Frameworks */,
+				3BF50A222DDB4D910064B873 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3BF50A262DDB4D910064B873 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3BF50A272DDB4D910064B873 /* Just BirthdaysTests */,
+			);
+			name = "Just BirthdaysTests";
+			packageProductDependencies = (
+			);
+			productName = "Just BirthdaysTests";
+			productReference = 3BF50A242DDB4D910064B873 /* Just BirthdaysTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3BF50A2D2DDB4D910064B873 /* Just BirthdaysUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BF50A3E2DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just BirthdaysUITests" */;
+			buildPhases = (
+				3BF50A2A2DDB4D910064B873 /* Sources */,
+				3BF50A2B2DDB4D910064B873 /* Frameworks */,
+				3BF50A2C2DDB4D910064B873 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3BF50A302DDB4D910064B873 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3BF50A312DDB4D910064B873 /* Just BirthdaysUITests */,
+			);
+			name = "Just BirthdaysUITests";
+			packageProductDependencies = (
+			);
+			productName = "Just BirthdaysUITests";
+			productReference = 3BF50A2E2DDB4D910064B873 /* Just BirthdaysUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3BF50A0E2DDB4D900064B873 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					3BF50A152DDB4D900064B873 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					3BF50A232DDB4D910064B873 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 3BF50A152DDB4D900064B873;
+					};
+					3BF50A2D2DDB4D910064B873 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 3BF50A152DDB4D900064B873;
+					};
+				};
+			};
+			buildConfigurationList = 3BF50A112DDB4D900064B873 /* Build configuration list for PBXProject "Just Birthdays" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3BF50A0D2DDB4D900064B873;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3BF50A172DDB4D900064B873 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3BF50A152DDB4D900064B873 /* Just Birthdays */,
+				3BF50A232DDB4D910064B873 /* Just BirthdaysTests */,
+				3BF50A2D2DDB4D910064B873 /* Just BirthdaysUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3BF50A142DDB4D900064B873 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A222DDB4D910064B873 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A2C2DDB4D910064B873 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3BF50A122DDB4D900064B873 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A202DDB4D910064B873 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF50A2A2DDB4D910064B873 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3BF50A262DDB4D910064B873 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3BF50A152DDB4D900064B873 /* Just Birthdays */;
+			targetProxy = 3BF50A252DDB4D910064B873 /* PBXContainerItemProxy */;
+		};
+		3BF50A302DDB4D910064B873 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3BF50A152DDB4D900064B873 /* Just Birthdays */;
+			targetProxy = 3BF50A2F2DDB4D910064B873 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3BF50A362DDB4D910064B873 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = F64C78596D;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3BF50A372DDB4D910064B873 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = F64C78596D;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		3BF50A392DDB4D910064B873 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Just Birthdays/Just_Birthdays.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-Birthdays";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3BF50A3A2DDB4D910064B873 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Just Birthdays/Just_Birthdays.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-Birthdays";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3BF50A3C2DDB4D910064B873 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-BirthdaysTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Just Birthdays.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Just Birthdays";
+			};
+			name = Debug;
+		};
+		3BF50A3D2DDB4D910064B873 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-BirthdaysTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Just Birthdays.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Just Birthdays";
+			};
+			name = Release;
+		};
+		3BF50A3F2DDB4D910064B873 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-BirthdaysUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "Just Birthdays";
+			};
+			name = Debug;
+		};
+		3BF50A402DDB4D910064B873 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = F64C78596D;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "colinismyname.Just-BirthdaysUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = "Just Birthdays";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3BF50A112DDB4D900064B873 /* Build configuration list for PBXProject "Just Birthdays" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF50A362DDB4D910064B873 /* Debug */,
+				3BF50A372DDB4D910064B873 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF50A382DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just Birthdays" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF50A392DDB4D910064B873 /* Debug */,
+				3BF50A3A2DDB4D910064B873 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF50A3B2DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just BirthdaysTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF50A3C2DDB4D910064B873 /* Debug */,
+				3BF50A3D2DDB4D910064B873 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BF50A3E2DDB4D910064B873 /* Build configuration list for PBXNativeTarget "Just BirthdaysUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BF50A3F2DDB4D910064B873 /* Debug */,
+				3BF50A402DDB4D910064B873 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3BF50A0E2DDB4D900064B873 /* Project object */;
+}

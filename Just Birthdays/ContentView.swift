@@ -1,5 +1,5 @@
 // MARK: - ContentView.swift
-// Main view with refined text-based tabs and sort toggle.
+// Main view with refined text-based tabs and sort toggle, integrating settings.
 
 import SwiftUI
 
@@ -8,6 +8,14 @@ struct ContentView: View {
     @State private var entryToEdit: BirthdayEntry? = nil
     @State private var showingAddNewSheet = false
     
+    @AppStorage(AppSettings.showYearInListKey) var showYearInList: Bool = AppSettings.defaultShowYearInList
+    @AppStorage(AppSettings.isPhoneNumberClickableKey) var isPhoneNumberClickable: Bool = AppSettings.defaultIsPhoneNumberClickable
+    @AppStorage(AppSettings.isEmailClickableKey) var isEmailClickable: Bool = AppSettings.defaultIsEmailClickable
+    // Updated to use the new key for social media URL clickability
+    @AppStorage(AppSettings.isSocialMediaURLClickableKey) var isSocialMediaURLClickable: Bool = AppSettings.defaultIsSocialMediaURLClickable
+    
+    @AppStorage(AppSettings.upcomingDaysKey) var upcomingBirthdayLeadTimeForViewID: Int = AppSettings.defaultUpcomingDays
+
     enum DisplayMode: String, CaseIterable, Identifiable {
         case today = "Today"
         case upcoming = "Upcoming"
@@ -56,7 +64,6 @@ struct ContentView: View {
     @ViewBuilder
     private var listHeaderControls: some View {
         HStack(alignment: .center) {
-            // Text-based Tab Buttons
             HStack(spacing: 18) {
                 ForEach(DisplayMode.allCases) { mode in
                     Button {
@@ -67,11 +74,9 @@ struct ContentView: View {
                         Text(mode.rawValue)
                             .font(.system(size: 15))
                             .fontWeight(selectedDisplayMode == mode ? .semibold : .regular)
-                            // Refined color for better differentiation:
-                            // Selected tab is darker (but not full black like names), unselected is standard secondary.
                             .foregroundColor(selectedDisplayMode == mode ? Color(NSColor.labelColor).opacity(0.85) : Color.secondary)
                             .padding(.vertical, 4)
-                            .background(Color.clear) // Ensure no unintended background on the text itself
+                            .background(Color.clear)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .contentShape(Rectangle())
@@ -110,9 +115,16 @@ struct ContentView: View {
                 ForEach(birthdaysToDisplay) { entry in
                     Group {
                         if selectedDisplayMode == .today {
-                            TodaysBirthdayRow(entry: entry, onNameTap: { self.entryToEdit = entry })
+                            TodaysBirthdayRow(
+                                entry: entry,
+                                onNameTap: { self.entryToEdit = entry },
+                                isPhoneNumberClickable: isPhoneNumberClickable,
+                                isEmailClickable: isEmailClickable,
+                                // Updated to pass the correct setting for social media URL
+                                isSocialMediaClickable: isSocialMediaURLClickable
+                            )
                         } else {
-                            BirthdayRow(entry: entry, store: store, onNameTap: { self.entryToEdit = entry })
+                            BirthdayRow(entry: entry, store: store, showYear: showYearInList, onNameTap: { self.entryToEdit = entry })
                         }
                     }
                     .padding(.vertical, 8)
@@ -161,14 +173,18 @@ struct ContentView: View {
         }
         .frame(minWidth: 320, idealWidth: 380, maxWidth: 500, minHeight: 350, idealHeight: 550)
         .background(Color(NSColor.windowBackgroundColor).ignoresSafeArea())
+        .id(upcomingBirthdayLeadTimeForViewID)
     }
 }
 
-// MARK: - Row Views (Updated for subtle styling)
+// MARK: - Row Views (Updated for settings)
 
 struct TodaysBirthdayRow: View {
     let entry: BirthdayEntry
     var onNameTap: () -> Void
+    let isPhoneNumberClickable: Bool
+    let isEmailClickable: Bool
+    let isSocialMediaClickable: Bool // Name remains the same, its value comes from isSocialMediaURLClickable
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -179,13 +195,14 @@ struct TodaysBirthdayRow: View {
                 .onTapGesture { onNameTap() }
             
             if let phoneNumber = entry.phoneNumber, !phoneNumber.isEmpty {
-                ContactInfoRow(iconName: "phone", detail: phoneNumber, type: .phone)
+                ContactInfoRow(iconName: "phone", detail: phoneNumber, type: .phone, isClickable: isPhoneNumberClickable)
             }
             if let emailAddress = entry.emailAddress, !emailAddress.isEmpty {
-                ContactInfoRow(iconName: "envelope", detail: emailAddress, type: .email)
+                ContactInfoRow(iconName: "envelope", detail: emailAddress, type: .email, isClickable: isEmailClickable)
             }
-            if let socialMediaHandle = entry.socialMediaHandle, !socialMediaHandle.isEmpty {
-                ContactInfoRow(iconName: "link", detail: socialMediaHandle, type: .social)
+            // Updated to use socialMediaURL from entry
+            if let socialMediaURL = entry.socialMediaURL, !socialMediaURL.isEmpty {
+                ContactInfoRow(iconName: "link", detail: socialMediaURL, type: .social, isClickable: isSocialMediaClickable)
             }
             if !entry.hasAnyContactInfo {
                 Text("No contact info")
@@ -201,11 +218,25 @@ struct ContactInfoRow: View {
     let iconName: String
     let detail: String
     let type: ContactTypeForOpening
+    let isClickable: Bool
 
     enum ContactTypeForOpening { case phone, email, social }
 
     var body: some View {
-        Button(action: { openContactDetail(detail: detail, type: type) }) {
+        if isClickable {
+            Button(action: { openContactDetail(detail: detail, type: type) }) {
+                HStack(spacing: 5) {
+                    Image(systemName: iconName)
+                        .font(.caption)
+                        .frame(width: 16, alignment: .center)
+                    Text(detail)
+                        .font(.caption)
+                        .underline()
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+            .foregroundColor(.accentColor)
+        } else {
             HStack(spacing: 5) {
                 Image(systemName: iconName)
                     .font(.caption)
@@ -213,9 +244,8 @@ struct ContactInfoRow: View {
                 Text(detail)
                     .font(.caption)
             }
+            .foregroundColor(.secondary)
         }
-        .buttonStyle(PlainButtonStyle())
-        .foregroundColor(.secondary)
     }
 
     private func openContactDetail(detail: String, type: ContactTypeForOpening) {
@@ -224,14 +254,21 @@ struct ContactInfoRow: View {
         switch type {
         case .phone: urlString = "tel:\(trimmedDetail.filter("0123456789".contains))"
         case .email: urlString = "mailto:\(trimmedDetail)"
-        case .social:
-            if trimmedDetail.lowercased().starts(with: "http://") || trimmedDetail.lowercased().starts(with: "https://") { urlString = trimmedDetail }
-            else if trimmedDetail.contains(".") && !trimmedDetail.contains(" ") { urlString = "https://\(trimmedDetail)" }
-            else if trimmedDetail.starts(with: "@") { urlString = "https://twitter.com/\(trimmedDetail.dropFirst())" }
-            else { print("Cannot directly open social handle: \(trimmedDetail)."); return }
+        case .social: // Assumes detail is a valid URL for social media
+            if trimmedDetail.lowercased().starts(with: "http://") || trimmedDetail.lowercased().starts(with: "https://") {
+                urlString = trimmedDetail
+            } else if trimmedDetail.contains(".") && !trimmedDetail.contains(" ") { // Try to make it a URL if it looks like one
+                urlString = "https://\(trimmedDetail)"
+            } else {
+                print("Social media link is not a full URL: \(trimmedDetail). Cannot open directly.")
+                return
+            }
         }
-        if let safeUrlString = urlString, let url = URL(string: safeUrlString) { #if os(macOS)
+        if let safeUrlString = urlString, let url = URL(string: safeUrlString) {
+            #if os(macOS)
             NSWorkspace.shared.open(url)
+            #elseif os(iOS)
+            // UIApplication.shared.open(url)
             #endif
         } else { print("Could not create a valid URL for contact detail: \(trimmedDetail)") }
     }
@@ -240,6 +277,7 @@ struct ContactInfoRow: View {
 struct BirthdayRow: View {
     let entry: BirthdayEntry
     @ObservedObject var store: BirthdayStore
+    let showYear: Bool
     var onNameTap: () -> Void
 
     var body: some View {
@@ -250,7 +288,7 @@ struct BirthdayRow: View {
                     .fontWeight(.regular)
                     .foregroundColor(.primary)
                     .onTapGesture { onNameTap() }
-                Text(entry.formattedBirthday)
+                Text(showYear ? entry.formattedBirthdayWithYear : entry.formattedBirthday)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -268,13 +306,22 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         let previewStore = BirthdayStore()
         let calendar = Calendar.current
+        
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: Date())
-        let todayBirthday = calendar.date(from: todayComponents)!
+        let todayBirthdayDate = calendar.date(from: DateComponents(year: 1990, month: todayComponents.month, day: todayComponents.day))!
+        // CORRECTED: Use socialMediaURL as the argument label
+        previewStore.addEntry(name: "Alex (Today)", birthday: todayBirthdayDate, phoneNumber: "555-0100", emailAddress: "alex@example.com", socialMediaURL: "https://twitter.com/alex_social")
         
-        previewStore.addEntry(name: "Alex (Today)", birthday: todayBirthday, phoneNumber: "555-0100", emailAddress: "alex@example.com", socialMediaHandle: "@alex")
         let upcomingDay1 = calendar.date(byAdding: .day, value: 3, to: Date())!
-        previewStore.addEntry(name: "Bob (Upcoming)", birthday: upcomingDay1, phoneNumber: nil, emailAddress: "bob@example.com", socialMediaHandle: nil)
+        let upcomingBirthdayDate1 = calendar.date(from: DateComponents(year: 1985, month: calendar.component(.month, from: upcomingDay1), day: calendar.component(.day, from: upcomingDay1)))!
+        // CORRECTED: Use socialMediaURL as the argument label
+        previewStore.addEntry(name: "Bob (Upcoming)", birthday: upcomingBirthdayDate1, phoneNumber: nil, emailAddress: "bob@example.com", socialMediaURL: nil)
         
+        let farOutDay = calendar.date(byAdding: .day, value: 45, to: Date())!
+        let farOutBirthdayDate = calendar.date(from: DateComponents(year: 2000, month: calendar.component(.month, from: farOutDay), day: calendar.component(.day, from: farOutDay)))!
+        // CORRECTED: Use socialMediaURL as the argument label
+        previewStore.addEntry(name: "Charlie (All)", birthday: farOutBirthdayDate, phoneNumber: "555-0102", emailAddress: nil, socialMediaURL: "https://charlie.blog.com")
+
         return ContentView().environmentObject(previewStore).frame(width: 380, height: 550)
     }
 }

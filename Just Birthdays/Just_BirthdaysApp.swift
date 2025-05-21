@@ -14,11 +14,13 @@ struct JustBirthdaysApp: App {
             ContentView()
                 .environmentObject(birthdayStore)
         }
-        // Remove the settings scene if you don't have one, or it can cause issues
-        // if not fully implemented. For a simple app, it's often not needed initially.
-        // Settings {
-        //     SettingsView()
-        // }
+        // Add the Settings scene to create a "Settings..." menu item
+        // and open the SettingsView when selected.
+        // The keyboard shortcut Command-Comma (⌘,) is standard for settings.
+        Settings {
+            SettingsView()
+                .environmentObject(birthdayStore) // Pass the store if settings need to interact with it
+        }
     }
 }
 
@@ -30,16 +32,3 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 }
-
-// (Optional) If you were to create a SettingsView:
-// struct SettingsView: View {
-//     var body: some View {
-//         Form {
-//             Text("App Settings")
-//                 .font(.title)
-//             Text("Configure your Just Birthdays app preferences here.")
-//         }
-//         .padding()
-//         .frame(width: 400, height: 300)
-//     }
-// }

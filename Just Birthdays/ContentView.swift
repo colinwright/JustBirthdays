@@ -11,7 +11,6 @@ struct ContentView: View {
     @AppStorage(AppSettings.showYearInListKey) var showYearInList: Bool = AppSettings.defaultShowYearInList
     @AppStorage(AppSettings.isPhoneNumberClickableKey) var isPhoneNumberClickable: Bool = AppSettings.defaultIsPhoneNumberClickable
     @AppStorage(AppSettings.isEmailClickableKey) var isEmailClickable: Bool = AppSettings.defaultIsEmailClickable
-    // Updated to use the new key for social media URL clickability
     @AppStorage(AppSettings.isSocialMediaURLClickableKey) var isSocialMediaURLClickable: Bool = AppSettings.defaultIsSocialMediaURLClickable
     
     @AppStorage(AppSettings.upcomingDaysKey) var upcomingBirthdayLeadTimeForViewID: Int = AppSettings.defaultUpcomingDays
@@ -22,7 +21,7 @@ struct ContentView: View {
         case all = "All"
         var id: String { self.rawValue }
     }
-    @State private var selectedDisplayMode: DisplayMode = .today
+    @State private var selectedDisplayMode: DisplayMode
 
     @State private var searchText = ""
     enum SortOrder: String, CaseIterable, Identifiable {
@@ -39,6 +38,11 @@ struct ContentView: View {
     }
     @State private var currentSortOrder: SortOrder = .chronological
 
+    // Initializer to accept the display mode from the App struct
+    init(initialDisplayMode: DisplayMode) {
+        _selectedDisplayMode = State(initialValue: initialDisplayMode)
+    }
+
     private var birthdaysToDisplay: [BirthdayEntry] {
         var listToProcess: [BirthdayEntry]
         switch selectedDisplayMode {
@@ -54,6 +58,8 @@ struct ContentView: View {
         if currentSortOrder == .alphabetical {
             listToProcess.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         } else {
+            // For chronological sort, the store already sorts by nextBirthdayDate.
+            // For 'Today', we still want alphabetical as secondary sort.
             if selectedDisplayMode == .today {
                  listToProcess.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             }
@@ -92,7 +98,7 @@ struct ContentView: View {
                 Image(systemName: currentSortOrder.iconName)
                     .font(.system(size: 17))
                     .foregroundColor(.secondary)
-                    .id(currentSortOrder.iconName)
+                    .id(currentSortOrder.iconName) // Ensure icon redraws
             }
             .buttonStyle(PlainButtonStyle())
             .frame(width: 28, height: 28, alignment: .center)
@@ -120,7 +126,6 @@ struct ContentView: View {
                                 onNameTap: { self.entryToEdit = entry },
                                 isPhoneNumberClickable: isPhoneNumberClickable,
                                 isEmailClickable: isEmailClickable,
-                                // Updated to pass the correct setting for social media URL
                                 isSocialMediaClickable: isSocialMediaURLClickable
                             )
                         } else {
@@ -138,7 +143,7 @@ struct ContentView: View {
                     }
                 }
             }
-            Spacer(minLength: 0)
+            Spacer(minLength: 0) // Takes up remaining space
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -166,14 +171,17 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingAddNewSheet) {
+            // Provide a unique ID to ensure AddBirthdayView re-initializes for new entries
             AddBirthdayView(store: store, entryToEdit: nil).id(UUID())
         }
         .sheet(item: $entryToEdit) { currentEntryToEdit in
+            // Use the entry's ID to ensure AddBirthdayView re-initializes if a different entry is chosen
             AddBirthdayView(store: store, entryToEdit: currentEntryToEdit).id(currentEntryToEdit.id)
         }
         .frame(minWidth: 320, idealWidth: 380, maxWidth: 500, minHeight: 350, idealHeight: 550)
         .background(Color(NSColor.windowBackgroundColor).ignoresSafeArea())
-        .id(upcomingBirthdayLeadTimeForViewID)
+        .id(upcomingBirthdayLeadTimeForViewID) // Used to refresh view if setting changes
+        // .onOpenURL is now handled in JustBirthdaysApp.swift
     }
 }
 
@@ -184,7 +192,7 @@ struct TodaysBirthdayRow: View {
     var onNameTap: () -> Void
     let isPhoneNumberClickable: Bool
     let isEmailClickable: Bool
-    let isSocialMediaClickable: Bool // Name remains the same, its value comes from isSocialMediaURLClickable
+    let isSocialMediaClickable: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -200,7 +208,6 @@ struct TodaysBirthdayRow: View {
             if let emailAddress = entry.emailAddress, !emailAddress.isEmpty {
                 ContactInfoRow(iconName: "envelope", detail: emailAddress, type: .email, isClickable: isEmailClickable)
             }
-            // Updated to use socialMediaURL from entry
             if let socialMediaURL = entry.socialMediaURL, !socialMediaURL.isEmpty {
                 ContactInfoRow(iconName: "link", detail: socialMediaURL, type: .social, isClickable: isSocialMediaClickable)
             }
@@ -254,10 +261,10 @@ struct ContactInfoRow: View {
         switch type {
         case .phone: urlString = "tel:\(trimmedDetail.filter("0123456789".contains))"
         case .email: urlString = "mailto:\(trimmedDetail)"
-        case .social: // Assumes detail is a valid URL for social media
+        case .social:
             if trimmedDetail.lowercased().starts(with: "http://") || trimmedDetail.lowercased().starts(with: "https://") {
                 urlString = trimmedDetail
-            } else if trimmedDetail.contains(".") && !trimmedDetail.contains(" ") { // Try to make it a URL if it looks like one
+            } else if trimmedDetail.contains(".") && !trimmedDetail.contains(" ") {
                 urlString = "https://\(trimmedDetail)"
             } else {
                 print("Social media link is not a full URL: \(trimmedDetail). Cannot open directly.")
@@ -267,8 +274,6 @@ struct ContactInfoRow: View {
         if let safeUrlString = urlString, let url = URL(string: safeUrlString) {
             #if os(macOS)
             NSWorkspace.shared.open(url)
-            #elseif os(iOS)
-            // UIApplication.shared.open(url)
             #endif
         } else { print("Could not create a valid URL for contact detail: \(trimmedDetail)") }
     }
@@ -309,19 +314,16 @@ struct ContentView_Previews: PreviewProvider {
         
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: Date())
         let todayBirthdayDate = calendar.date(from: DateComponents(year: 1990, month: todayComponents.month, day: todayComponents.day))!
-        // CORRECTED: Use socialMediaURL as the argument label
-        previewStore.addEntry(name: "Alex (Today)", birthday: todayBirthdayDate, phoneNumber: "555-0100", emailAddress: "alex@example.com", socialMediaURL: "https://twitter.com/alex_social")
+        previewStore.addEntry(name: "Alex (Today, Year Known)", birthday: todayBirthdayDate, phoneNumber: "555-0100", emailAddress: "alex@example.com", socialMediaURL: "https://twitter.com/alex_social", notes: "Prefers gift cards.", yearIsKnown: true)
         
         let upcomingDay1 = calendar.date(byAdding: .day, value: 3, to: Date())!
-        let upcomingBirthdayDate1 = calendar.date(from: DateComponents(year: 1985, month: calendar.component(.month, from: upcomingDay1), day: calendar.component(.day, from: upcomingDay1)))!
-        // CORRECTED: Use socialMediaURL as the argument label
-        previewStore.addEntry(name: "Bob (Upcoming)", birthday: upcomingBirthdayDate1, phoneNumber: nil, emailAddress: "bob@example.com", socialMediaURL: nil)
+        let upcomingBirthdayDate1 = calendar.date(from: DateComponents(year: 1, month: calendar.component(.month, from: upcomingDay1), day: calendar.component(.day, from: upcomingDay1)))!
+        previewStore.addEntry(name: "Bob (Upcoming, No Year)", birthday: upcomingBirthdayDate1, phoneNumber: nil, emailAddress: "bob@example.com", socialMediaURL: nil, notes: nil, yearIsKnown: false)
         
         let farOutDay = calendar.date(byAdding: .day, value: 45, to: Date())!
         let farOutBirthdayDate = calendar.date(from: DateComponents(year: 2000, month: calendar.component(.month, from: farOutDay), day: calendar.component(.day, from: farOutDay)))!
-        // CORRECTED: Use socialMediaURL as the argument label
-        previewStore.addEntry(name: "Charlie (All)", birthday: farOutBirthdayDate, phoneNumber: "555-0102", emailAddress: nil, socialMediaURL: "https://charlie.blog.com")
+        previewStore.addEntry(name: "Charlie (All, Year Known)", birthday: farOutBirthdayDate, phoneNumber: "555-0102", emailAddress: nil, socialMediaURL: "https://charlie.blog.com", notes: "Has a dog named Sparky.", yearIsKnown: true)
 
-        return ContentView().environmentObject(previewStore).frame(width: 380, height: 550)
+        return ContentView(initialDisplayMode: .today).environmentObject(previewStore).frame(width: 380, height: 550)
     }
 }

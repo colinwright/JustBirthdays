@@ -9,7 +9,6 @@ struct SettingsView: View {
     
     @AppStorage(AppSettings.isPhoneNumberClickableKey) var isPhoneNumberClickable: Bool = AppSettings.defaultIsPhoneNumberClickable
     @AppStorage(AppSettings.isEmailClickableKey) var isEmailClickable: Bool = AppSettings.defaultIsEmailClickable
-    // Updated to use the new key for social media URL
     @AppStorage(AppSettings.isSocialMediaURLClickableKey) var isSocialMediaURLClickable: Bool = AppSettings.defaultIsSocialMediaURLClickable
 
     @EnvironmentObject var birthdayStore: BirthdayStore
@@ -22,14 +21,11 @@ struct SettingsView: View {
         return formatter
     }
 
-    // Consistent spacing value for items within a section, below the header
     private let sectionContentTopPadding: CGFloat = 5
-    // Consistent spacing value for descriptive text below a control
-    private let descriptionTextTopPadding: CGFloat = 0 // Reduced to bring text closer to toggle
+    private let descriptionTextTopPadding: CGFloat = 0
 
     var body: some View {
         Form {
-            // Section for Display Preferences
             Section {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Show upcoming birthdays for the next:")
@@ -45,7 +41,7 @@ struct SettingsView: View {
                 .padding(.bottom, 8)
 
                 Toggle("Show year in birthday lists", isOn: $showYearInList)
-                Text("If enabled, the year of birth will be displayed in the main birthday lists.")
+                Text("If enabled, the year of birth will be displayed for entries where it is known.")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -53,11 +49,10 @@ struct SettingsView: View {
             } header: {
                 Text("Display Preferences").font(.headline)
             }
-            .padding(.top, sectionContentTopPadding) // Space below header
+            .padding(.top, sectionContentTopPadding)
 
             Divider()
 
-            // Section for Interaction Preferences
             Section {
                 VStack(alignment: .leading, spacing: 10) {
                     Toggle("Make phone numbers clickable", isOn: $isPhoneNumberClickable)
@@ -72,11 +67,10 @@ struct SettingsView: View {
             } header: {
                 Text("Interaction Preferences").font(.headline)
             }
-            .padding(.top, sectionContentTopPadding) // Space below header
+            .padding(.top, sectionContentTopPadding)
             
             Divider()
 
-            // Section for Data Management
             Section {
                 HStack {
                     Button("Export Birthdays...") {
@@ -89,14 +83,12 @@ struct SettingsView: View {
             } header: {
                 Text("Data Management").font(.headline)
             }
-            .padding(.top, sectionContentTopPadding) // Space below header
+            .padding(.top, sectionContentTopPadding)
             
         }
         .padding(EdgeInsets(top: 15, leading: 20, bottom: 20, trailing: 20))
         .frame(width: 480, height: 420)
     }
-
-    // MARK: - Import/Export Logic (Assumed unchanged and correct from previous version)
 
     func exportBirthdays() {
         let savePanel = NSSavePanel()
@@ -106,7 +98,7 @@ struct SettingsView: View {
 
         savePanel.begin { response in
             if response == .OK, let url = savePanel.url {
-                var csvString = "id,name,birthday,phoneNumber,emailAddress,socialMediaURL\n"
+                var csvString = "id,name,birthday,phoneNumber,emailAddress,socialMediaURL,notes,yearIsKnown\n"
                 for entry in birthdayStore.entries {
                     let id = entry.id.uuidString
                     let name = escapeCSVField(entry.name)
@@ -114,12 +106,13 @@ struct SettingsView: View {
                     let phone = escapeCSVField(entry.phoneNumber ?? "")
                     let email = escapeCSVField(entry.emailAddress ?? "")
                     let social = escapeCSVField(entry.socialMediaURL ?? "")
-                    csvString.append("\(id),\(name),\(birthday),\(phone),\(email),\(social)\n")
+                    let notes = escapeCSVField(entry.notes ?? "")
+                    let yearKnown = entry.yearIsKnown ? "true" : "false"
+                    csvString.append("\(id),\(name),\(birthday),\(phone),\(email),\(social),\(notes),\(yearKnown)\n")
                 }
 
                 do {
                     try csvString.write(to: url, atomically: true, encoding: .utf8)
-                    print("Successfully exported birthdays to: \(url.path)")
                 } catch {
                     print("Error exporting birthdays: \(error.localizedDescription)")
                 }
@@ -140,18 +133,15 @@ struct SettingsView: View {
                     let csvString = try String(contentsOf: url, encoding: .utf8)
                     let lines = csvString.components(separatedBy: .newlines).filter { !$0.isEmpty }
                     
-                    guard lines.count > 1 else {
-                        print("CSV file is empty or has no data rows.")
-                        return
-                    }
+                    guard lines.count > 1 else { return }
 
                     var importedCount = 0
                     for i in 1..<lines.count {
                         let line = lines[i]
                         let fields = parseCSVLine(line)
 
-                        guard fields.count == 6 else {
-                            print("Skipping malformed CSV line (expected 6 fields): \(line)")
+                        guard fields.count >= 7 else {
+                            print("Skipping malformed CSV line (expected at least 7 fields): \(line)")
                             continue
                         }
                         
@@ -163,13 +153,18 @@ struct SettingsView: View {
                         let phoneNumber = fields[3].isEmpty ? nil : unescapeCSVField(fields[3])
                         let emailAddress = fields[4].isEmpty ? nil : unescapeCSVField(fields[4])
                         let socialMediaURLValue = fields[5].isEmpty ? nil : unescapeCSVField(fields[5])
+                        let notesValue = fields[6].isEmpty ? nil : unescapeCSVField(fields[6])
+                        let yearIsKnownValue = fields.count > 7 ? (fields[7].lowercased() == "true") : true
+
 
                         birthdayStore.addEntry(
                             name: name,
                             birthday: birthday,
                             phoneNumber: phoneNumber,
                             emailAddress: emailAddress,
-                            socialMediaURL: socialMediaURLValue
+                            socialMediaURL: socialMediaURLValue,
+                            notes: notesValue,
+                            yearIsKnown: yearIsKnownValue
                         )
                         importedCount += 1
                     }
@@ -192,18 +187,26 @@ struct SettingsView: View {
         var fields: [String] = []
         var currentField = ""
         var inQuotes = false
-        for char in line {
+        var i = line.startIndex
+        while i < line.endIndex {
+            let char = line[i]
             if char == "\"" {
-                inQuotes.toggle()
+                if inQuotes, i < line.index(before: line.endIndex), line[line.index(after: i)] == "\"" {
+                    currentField.append("\"")
+                    i = line.index(after: i)
+                } else {
+                    inQuotes.toggle()
+                }
             } else if char == "," && !inQuotes {
                 fields.append(currentField)
                 currentField = ""
             } else {
                 currentField.append(char)
             }
+            i = line.index(after: i)
         }
         fields.append(currentField)
-        return fields
+        return fields.map { unescapeCSVField($0) }
     }
 
     private func unescapeCSVField(_ field: String) -> String {
@@ -220,6 +223,6 @@ struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
             .environmentObject(BirthdayStore())
-            .frame(width: 480, height: 390)
+            .frame(width: 480, height: 420)
     }
 }

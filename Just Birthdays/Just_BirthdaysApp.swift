@@ -9,10 +9,24 @@ struct JustBirthdaysApp: App {
     // Delegate to handle app lifecycle events, specifically window closing.
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
+    @State private var activeDisplayMode: ContentView.DisplayMode = .today
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(initialDisplayMode: activeDisplayMode)
                 .environmentObject(birthdayStore)
+                .onOpenURL { url in
+                    guard url.scheme == "justbirthdays" else { return }
+                    
+                    switch url.host {
+                    case "openToday":
+                        activeDisplayMode = .today
+                    case "openUpcoming":
+                        activeDisplayMode = .upcoming
+                    default:
+                        activeDisplayMode = .today // Default to today if host is unknown
+                    }
+                }
         }
         // Add the Settings scene to create a "Settings..." menu item
         // and open the SettingsView when selected.

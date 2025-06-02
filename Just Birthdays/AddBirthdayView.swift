@@ -14,14 +14,13 @@ struct AddBirthdayView: View {
     @State private var birthday: Date // Main date source of truth
     @State private var phoneNumber: String
     @State private var emailAddress: String
-    // Renamed to socialMediaURL for clarity
     @State private var socialMediaURL: String
+    @State private var notes: String
 
-    @State private var monthInput: String = ""
-    @State private var dayInput: String = ""
-    @State private var yearInput: String = ""
+    @State private var monthInput: String
+    @State private var dayInput: String
+    @State private var yearInput: String
 
-    // Updated FocusState enum to include the name field
     enum FocusableField: Hashable {
         case name, month, day, year
     }
@@ -36,17 +35,24 @@ struct AddBirthdayView: View {
         self.entryToEdit = entryToEdit
         
         let initialDate = entryToEdit?.birthday ?? Date()
+        let initialYearIsKnown = entryToEdit?.yearIsKnown ?? true
+
         _birthday = State(initialValue: initialDate)
         _name = State(initialValue: entryToEdit?.name ?? "")
         _phoneNumber = State(initialValue: entryToEdit?.phoneNumber ?? "")
         _emailAddress = State(initialValue: entryToEdit?.emailAddress ?? "")
-        // Updated to initialize socialMediaURL
         _socialMediaURL = State(initialValue: entryToEdit?.socialMediaURL ?? "")
+        _notes = State(initialValue: entryToEdit?.notes ?? "")
 
         let components = Calendar.current.dateComponents([.month, .day, .year], from: initialDate)
         _monthInput = State(initialValue: String(format: "%02d", components.month ?? 1))
         _dayInput = State(initialValue: String(format: "%02d", components.day ?? 1))
-        _yearInput = State(initialValue: String(format: "%04d", components.year ?? Calendar.current.component(.year, from: Date())))
+        
+        if initialYearIsKnown {
+            _yearInput = State(initialValue: String(format: "%04d", components.year ?? Calendar.current.component(.year, from: Date())))
+        } else {
+            _yearInput = State(initialValue: "")
+        }
     }
 
     // MARK: - UI Helper Functions & Computed Properties
@@ -77,7 +83,6 @@ struct AddBirthdayView: View {
             }
     }
 
-    // Computed property for Person Details section
     private var personDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(title: "Person Details")
@@ -91,48 +96,53 @@ struct AddBirthdayView: View {
         .padding(.horizontal)
     }
     
-    // Computed property for the custom Birthday Input Field
     private var birthdayInputField: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Birthday").font(.caption).foregroundColor(.secondary)
-            HStack(spacing: 0) {
+            HStack(spacing: 4) {
                 TextField("MM", text: $monthInput)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .frame(width: 30)
+                    .frame(width: 35)
                     .multilineTextAlignment(.center)
                     .focused($focusedField, equals: .month)
-                    .onChange(of: monthInput) { oldValue, newValue in handleMonthChange(newValue) }
+                    .onChange(of: monthInput) { handleMonthChange($1) }
                     .onReceive(Just(monthInput)) { newValue in
                         let filtered = newValue.filter { "0123456789".contains($0) }
-                        monthInput = String(filtered.prefix(2))
+                        if filtered.count > 2 {
+                            monthInput = String(filtered.prefix(2))
+                        }
                     }
 
-                Text("/").foregroundColor(.secondary).padding(.horizontal, 2)
+                Text("/").foregroundColor(.secondary)
 
                 TextField("DD", text: $dayInput)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .frame(width: 30)
+                    .frame(width: 35)
                     .multilineTextAlignment(.center)
                     .focused($focusedField, equals: .day)
-                    .onChange(of: dayInput) { oldValue, newValue in handleDayChange(newValue) }
+                    .onChange(of: dayInput) { handleDayChange($1) }
                     .onReceive(Just(dayInput)) { newValue in
                         let filtered = newValue.filter { "0123456789".contains($0) }
-                        dayInput = String(filtered.prefix(2))
+                        if filtered.count > 2 {
+                           dayInput = String(filtered.prefix(2))
+                        }
                     }
 
-                Text("/").foregroundColor(.secondary).padding(.horizontal, 2)
+                Text("/").foregroundColor(.secondary)
 
                 TextField("YYYY", text: $yearInput)
                     .textFieldStyle(PlainTextFieldStyle())
-                    .frame(width: 45)
+                    .frame(width: 50)
                     .multilineTextAlignment(.center)
                     .focused($focusedField, equals: .year)
-                    .onChange(of: yearInput) { oldValue, newValue in handleYearChange(newValue) }
+                    .onChange(of: yearInput) { handleYearChange($1) }
                      .onReceive(Just(yearInput)) { newValue in
                         let filtered = newValue.filter { "0123456789".contains($0) }
-                        yearInput = String(filtered.prefix(4))
+                        if filtered.count > 4 {
+                           yearInput = String(filtered.prefix(4))
+                        }
                     }
-                
+                                
                 Spacer()
 
                 Button {
@@ -160,10 +170,14 @@ struct AddBirthdayView: View {
             .popover(isPresented: $showingDatePickerPopover, arrowEdge: .bottom) {
                 datePickerPopoverContent
             }
+            
+            Text("Year is optional.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.leading, 2)
         }
     }
 
-    // Computed property for Contact Information section
     private var contactInformationSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionHeader(title: "Contact Information")
@@ -176,15 +190,32 @@ struct AddBirthdayView: View {
                 styledTextField(placeholder: "Optional", text: $emailAddress, disableAutocorrection: true)
             }
             VStack(alignment: .leading, spacing: 4) {
-                Text("Social Media URL").font(.caption).foregroundColor(.secondary) // Updated label
-                // Updated placeholder and binding
+                Text("Social Media URL").font(.caption).foregroundColor(.secondary)
                 styledTextField(placeholder: "Optional (e.g., https://...)", text: $socialMediaURL, disableAutocorrection: true)
             }
         }
         .padding(.horizontal)
     }
+    
+    private var moreInformationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader(title: "More Information")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Notes").font(.caption).foregroundColor(.secondary)
+                TextEditor(text: $notes)
+                    .frame(height: 60)
+                    .padding(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5))
+                    .background(Color(NSColor.textBackgroundColor))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                    )
+            }
+        }
+        .padding(.horizontal)
+    }
 
-    // Computed property for the bottom button bar
     private var bottomButtonBar: some View {
         VStack(spacing: 0) {
             Divider().padding(.bottom, 8)
@@ -208,7 +239,7 @@ struct AddBirthdayView: View {
                     saveEntry()
                 }
                 .keyboardShortcut(.defaultAction)
-                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !isDateInputValid())
             }
             .padding([.horizontal, .bottom]).padding(.top, 8)
         }
@@ -221,6 +252,7 @@ struct AddBirthdayView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     personDetailsSection
                     contactInformationSection
+                    moreInformationSection
                 }
                 .padding(.vertical)
             }
@@ -229,27 +261,20 @@ struct AddBirthdayView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(NSColor.windowBackgroundColor).ignoresSafeArea(.all))
         .navigationTitle(entryToEdit == nil ? "New Birthday" : "Edit Birthday")
-        .task(id: entryToEdit) {
-            let dateToUse = entryToEdit?.birthday ?? Date()
-            self.birthday = dateToUse
-            self.name = entryToEdit?.name ?? ""
-            self.phoneNumber = entryToEdit?.phoneNumber ?? ""
-            self.emailAddress = entryToEdit?.emailAddress ?? ""
-            // Updated to initialize socialMediaURL
-            self.socialMediaURL = entryToEdit?.socialMediaURL ?? ""
-            
-            updateDateInputs(from: dateToUse)
-
-            if entryToEdit == nil && self.name.isEmpty {
+        .task {
+             if entryToEdit == nil && self.name.isEmpty {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     focusedField = .name
                 }
-            } else if entryToEdit != nil && !self.name.isEmpty {
-                 focusedField = nil
             }
         }
-        .onChange(of: birthday) { oldValue, newValue in
-            updateDateInputs(from: newValue)
+        .onChange(of: focusedField) { oldValue, newValue in
+            if oldValue == .month {
+                formatSingleDigitInput(for: $monthInput)
+            }
+            if oldValue == .day {
+                formatSingleDigitInput(for: $dayInput)
+            }
         }
         .alert("Delete Birthday", isPresented: $showingDeleteConfirmation) {
             Button("Delete", role: .destructive) {
@@ -275,6 +300,7 @@ struct AddBirthdayView: View {
             .labelsHidden()
 
             Button("Done") {
+                updateDateInputs(from: self.birthday)
                 showingDatePickerPopover = false
             }
             .padding(.top, 5)
@@ -288,65 +314,50 @@ struct AddBirthdayView: View {
         let components = Calendar.current.dateComponents([.month, .day, .year], from: date)
         monthInput = String(format: "%02d", components.month ?? 1)
         dayInput = String(format: "%02d", components.day ?? 1)
-        yearInput = String(format: "%04d", components.year ?? Calendar.current.component(.year, from: Date()))
+        yearInput = String(format: "%04d", components.year ?? 1)
+    }
+    
+    private func formatSingleDigitInput(for binding: Binding<String>) {
+        let text = binding.wrappedValue
+        if let number = Int(text), number >= 1 && number <= 9 && text.count == 1 {
+            binding.wrappedValue = "0\(number)"
+        }
     }
 
     private func handleMonthChange(_ newValue: String) {
-        if monthInput.count == 2 {
-            if let monthVal = Int(monthInput), monthVal >= 1 && monthVal <= 12 {
-                focusedField = .day
-            }
+        if newValue.count == 2 {
+            focusedField = .day
         }
-        attemptDateConstruction()
     }
 
     private func handleDayChange(_ newValue: String) {
-        if dayInput.count == 2 {
-             if let dayVal = Int(dayInput), dayVal >= 1 && dayVal <= 31 {
-                focusedField = .year
-            }
-        } else if dayInput.isEmpty && focusedField == .day {
+        if newValue.count == 2 {
+            focusedField = .year
+        } else if newValue.isEmpty && focusedField == .day {
             focusedField = .month
         }
-        attemptDateConstruction()
     }
 
     private func handleYearChange(_ newValue: String) {
-        if yearInput.count == 4 {
-            if let yearVal = Int(yearInput), yearVal > 1900 && yearVal < 2100 {
-                 focusedField = nil
-            }
-        } else if yearInput.isEmpty && focusedField == .year {
-            focusedField = .day
+        if newValue.count == 4 {
+            focusedField = nil
         }
-        attemptDateConstruction()
     }
     
-    private func attemptDateConstruction() {
-        guard monthInput.count == 2, dayInput.count == 2, yearInput.count == 4,
-              let month = Int(monthInput),
-              let day = Int(dayInput),
-              let year = Int(yearInput) else {
-            return
-        }
-
+    private func isDateInputValid() -> Bool {
+        guard let month = Int(monthInput), let day = Int(dayInput) else { return false }
+        
+        let year = Int(yearInput) ?? 1
+        
         var components = DateComponents()
         components.year = year
         components.month = month
         components.day = day
         
-        if let date = Calendar.current.date(from: components) {
-            let validComponents = Calendar.current.dateComponents([.year, .month, .day], from: date)
-            if validComponents.year == year && validComponents.month == month && validComponents.day == day {
-                if self.birthday != date {
-                     self.birthday = date
-                }
-            } else {
-                print("Invalid date constructed from components: \(month)/\(day)/\(year)")
-            }
-        } else {
-             print("Could not construct date from components: \(month)/\(day)/\(year)")
-        }
+        guard let date = Calendar.current.date(from: components) else { return false }
+        
+        let createdComponents = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return createdComponents.year == year && createdComponents.month == month && createdComponents.day == day
     }
 
     private func performDelete() {
@@ -357,44 +368,49 @@ struct AddBirthdayView: View {
     }
 
     private func saveEntry() {
-        attemptDateConstruction()
-        
+        guard isDateInputValid() else { return }
+
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedName.isEmpty {
-            print("Name cannot be empty.")
-            return
-        }
+        if trimmedName.isEmpty { return }
 
-        let finalBirthday = self.birthday
-
-        let phoneToSave = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
-        let emailToSave = emailAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : emailAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Updated to save socialMediaURL
-        let socialToSave = socialMediaURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : socialMediaURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let phoneToSave = phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : phoneNumber
+        let emailToSave = emailAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : emailAddress
+        let socialToSave = socialMediaURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : socialMediaURL
+        let notesToSave = notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : notes
+        let finalYearIsKnown = !yearInput.isEmpty
+        
+        let year = Int(yearInput) ?? 1
+        let month = Int(monthInput)!
+        let day = Int(dayInput)!
+        
+        let components = DateComponents(year: year, month: month, day: day)
+        let finalBirthday = Calendar.current.date(from: components)!
 
         if var updatedEntry = entryToEdit {
             updatedEntry.name = trimmedName
             updatedEntry.birthday = finalBirthday
             updatedEntry.phoneNumber = phoneToSave
             updatedEntry.emailAddress = emailToSave
-            // Updated to save socialMediaURL
             updatedEntry.socialMediaURL = socialToSave
+            updatedEntry.notes = notesToSave
+            updatedEntry.yearIsKnown = finalYearIsKnown
             store.updateEntry(updatedEntry)
         } else {
-            // Ensure addEntry in BirthdayStore is updated to accept socialMediaURL
-            // For now, assuming the parameter name in addEntry is still socialMediaHandle
-            // but you'll pass the socialMediaURL value to it.
-            store.addEntry(name: trimmedName,
-                           birthday: finalBirthday,
-                           phoneNumber: phoneToSave,
-                           emailAddress: emailToSave,
-                           socialMediaURL: socialToSave) // This might need to be socialMediaURL if you change addEntry
+            store.addEntry(
+                name: trimmedName,
+                birthday: finalBirthday,
+                phoneNumber: phoneToSave,
+                emailAddress: emailToSave,
+                socialMediaURL: socialToSave,
+                notes: notesToSave,
+                yearIsKnown: finalYearIsKnown
+            )
         }
         dismiss()
     }
 }
 
-// Custom ViewModifier for conditional focus (optional, but can make styledTextField cleaner)
+// Custom ViewModifier for conditional focus
 extension View {
     @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
         if condition {
@@ -410,20 +426,28 @@ extension View {
 struct AddBirthdayView_Previews: PreviewProvider {
     static var previews: some View {
         let previewStore = BirthdayStore()
-        let sampleEntry = BirthdayEntry(name: "Jane Doe", birthday: Calendar.current.date(byAdding: .year, value: -30, to: Date())!, phoneNumber: "555-1234",
-                                        emailAddress: "jane@example.com", socialMediaURL: "https://example.com/janedoe") // Updated preview
+        let sampleEntryWithYear = BirthdayEntry(name: "Jane Doe", birthday: Calendar.current.date(byAdding: .year, value: -30, to: Date())!, phoneNumber: "555-1234",
+                                        emailAddress: "jane@example.com", socialMediaURL: "https://example.com/janedoe", notes: "Loves chocolate cake.", yearIsKnown: true)
+        let sampleEntryWithoutYear = BirthdayEntry(name: "John Smith", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: nil, notes: "No year known.", yearIsKnown: false)
+
         Group {
             NavigationView {
                 AddBirthdayView(store: previewStore, entryToEdit: nil)
             }
-            .previewDisplayName("New Birthday (Sheet)")
-            .frame(width: 480, height: 400)
+            .previewDisplayName("New Birthday")
+            .frame(width: 480, height: 500)
 
             NavigationView {
-                AddBirthdayView(store: previewStore, entryToEdit: sampleEntry)
+                AddBirthdayView(store: previewStore, entryToEdit: sampleEntryWithYear)
             }
-            .previewDisplayName("Edit Birthday (Sheet)")
-            .frame(width: 480, height: 400)
+            .previewDisplayName("Edit Birthday (Year Known)")
+            .frame(width: 480, height: 500)
+            
+            NavigationView {
+                AddBirthdayView(store: previewStore, entryToEdit: sampleEntryWithoutYear)
+            }
+            .previewDisplayName("Edit Birthday (No Year)")
+            .frame(width: 480, height: 500)
         }
     }
 }

@@ -46,7 +46,7 @@ struct BirthdayTimelineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> SimpleBirthdayEntry {
         // Use the provider's widgetType for the placeholder
-        let sampleBirthday = BirthdayEntry(name: "Alex Applebaum-Smithington", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/alex") // Longer name for testing, updated to socialMediaURL
+        let sampleBirthday = BirthdayEntry(name: "Alex Applebaum-Smithington", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/alex", notes: nil, yearIsKnown: true)
         return SimpleBirthdayEntry(date: Date(), birthdays: [sampleBirthday], widgetType: self.widgetType, isError: false, errorMessage: "Placeholder")
     }
 
@@ -153,7 +153,6 @@ struct TodaysBirthdaysWidgetView : View {
         }
     }
 
-    // Removed @ViewBuilder from this function
     private func birthdayListView(maxItems: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(entry.birthdays.prefix(maxItems)) { bd in
@@ -171,7 +170,6 @@ struct TodaysBirthdaysWidgetView : View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    // Removed @ViewBuilder from this function
     private func emptyStateView(message: String) -> some View {
         VStack {
             Spacer()
@@ -187,7 +185,6 @@ struct TodaysBirthdaysWidgetView : View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    // Removed @ViewBuilder from this function
     private func clickForMoreView() -> some View {
         HStack {
             Spacer()
@@ -221,7 +218,7 @@ struct UpcomingBirthdaysWidgetView : View {
     // Helper function to determine max items
     private func getMaxItems() -> Int {
         switch family {
-        case .systemSmall: return 1
+        case .systemSmall: return 2 // Changed from 1 to 2
         case .systemMedium: return 3
         case .systemLarge: return 6
         default: return 3
@@ -239,7 +236,6 @@ struct UpcomingBirthdaysWidgetView : View {
         }
     }
 
-    // Removed @ViewBuilder from this function
     private func upcomingBirthdayListView(maxItems: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(entry.birthdays.prefix(maxItems)) { bd in
@@ -263,7 +259,6 @@ struct UpcomingBirthdaysWidgetView : View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    // Removed @ViewBuilder from this function
     private func emptyStateView(message: String) -> some View {
         VStack {
             Spacer()
@@ -279,7 +274,6 @@ struct UpcomingBirthdaysWidgetView : View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // Removed @ViewBuilder from this function
     private func clickForMoreView() -> some View {
         HStack {
             Spacer()
@@ -349,9 +343,9 @@ struct JustBirthdaysWidgetBundle: WidgetBundle {
 struct TodaysBirthdaysWidget_Previews: PreviewProvider {
     static var previews: some View {
         let sampleBirthdays = [
-            BirthdayEntry(name: "Alice Wonderland Smith", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/alice"), // Updated
-            BirthdayEntry(name: "Robert 'Bob' The Builder Jr.", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: nil), // Updated
-            BirthdayEntry(name: "Another Person With A Birthday", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/another") // Updated
+            BirthdayEntry(name: "Alice Wonderland Smith", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/alice", notes: nil, yearIsKnown: true),
+            BirthdayEntry(name: "Robert 'Bob' The Builder Jr.", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: nil, notes: nil, yearIsKnown: true),
+            BirthdayEntry(name: "Another Person With A Birthday", birthday: Date(), phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/another", notes: nil, yearIsKnown: false)
         ]
         let entry = SimpleBirthdayEntry(date: Date(), birthdays: sampleBirthdays, widgetType: .today, isError: false, errorMessage: nil)
         
@@ -372,9 +366,9 @@ struct TodaysBirthdaysWidget_Previews: PreviewProvider {
 struct UpcomingBirthdaysWidget_Previews: PreviewProvider {
     static var previews: some View {
         let sampleBirthdays = [
-            BirthdayEntry(name: "Charles Xavier Brownstone III", birthday: Calendar.current.date(byAdding: .day, value: 3, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: nil), // Updated
-            BirthdayEntry(name: "Diana Prince of Themyscira", birthday: Calendar.current.date(byAdding: .day, value: 7, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/diana"), // Updated
-            BirthdayEntry(name: "Yet Another Upcoming Birthday Person", birthday: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: nil) // Updated
+            BirthdayEntry(name: "Charles Xavier Brownstone III", birthday: Calendar.current.date(byAdding: .day, value: 3, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: nil, notes: nil, yearIsKnown: true),
+            BirthdayEntry(name: "Diana Prince of Themyscira", birthday: Calendar.current.date(byAdding: .day, value: 7, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: "https://example.com/diana", notes: nil, yearIsKnown: false),
+            BirthdayEntry(name: "Yet Another Upcoming Birthday Person", birthday: Calendar.current.date(byAdding: .day, value: 10, to: Date())!, phoneNumber: nil, emailAddress: nil, socialMediaURL: nil, notes: nil, yearIsKnown: true)
         ]
         let entry = SimpleBirthdayEntry(date: Date(), birthdays: sampleBirthdays, widgetType: .upcoming, isError: false, errorMessage: nil)
         

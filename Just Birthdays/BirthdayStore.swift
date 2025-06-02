@@ -82,18 +82,21 @@ class BirthdayStore: ObservableObject {
         print("No entries found in \(sourceDescription) or decoding failed.")
     }
 
-    // Updated to accept socialMediaURL
     func addEntry(name: String,
                   birthday: Date,
                   phoneNumber: String?,
                   emailAddress: String?,
-                  socialMediaURL: String?) { // Renamed parameter
+                  socialMediaURL: String?,
+                  notes: String?,
+                  yearIsKnown: Bool) {
         let newEntry = BirthdayEntry(
             name: name,
             birthday: birthday,
             phoneNumber: phoneNumber,
             emailAddress: emailAddress,
-            socialMediaURL: socialMediaURL // Use renamed property
+            socialMediaURL: socialMediaURL,
+            notes: notes,
+            yearIsKnown: yearIsKnown
         )
         var mutableEntries = entries
         mutableEntries.append(newEntry)
@@ -107,11 +110,9 @@ class BirthdayStore: ObservableObject {
     }
 
     func updateEntry(_ entry: BirthdayEntry) {
-        // This function already works with the BirthdayEntry struct,
-        // which should have its socialMediaURL property updated when 'entry' is passed in.
         if let index = entries.firstIndex(where: { $0.id == entry.id }) {
             var mutableEntries = entries
-            mutableEntries[index] = entry // entry already has the updated socialMediaURL
+            mutableEntries[index] = entry
             mutableEntries.sort {
                 if $0.nextBirthdayDate != $1.nextBirthdayDate {
                     return $0.nextBirthdayDate < $1.nextBirthdayDate

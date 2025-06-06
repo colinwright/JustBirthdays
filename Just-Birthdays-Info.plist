@@ -2,7 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>_XCCurrentVersionName</key>
-	<string>Just_Birthdays.xcdatamodel</string>
+	<key>AppGroupIdentifier</key>
+	<string>$(APP_GROUP)</string>
+	<key>CloudKitContainerIdentifier</key>
+	<string>$(ICLOUD_CONTAINER)</string>
 </dict>
 </plist>

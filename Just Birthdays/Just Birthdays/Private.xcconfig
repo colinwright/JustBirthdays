@@ -1,0 +1,6 @@
+// Private.xcconfig
+
+// Replace with your actual identifiers
+APP_BUNDLE_ID = com.colinismyname.JustBirthdays
+APP_GROUP = group.com.colinismyname.JustBirthdays
+ICLOUD_CONTAINER = iCloud.com.colinismyname.JustBirthdays

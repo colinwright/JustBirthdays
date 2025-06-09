@@ -40,7 +40,11 @@ extension Person {
         return year != Person.defaultYear
     }
 
-    // This is the corrected implementation. It now properly ignores the year.
+    var ageTurningToday: Int? {
+        guard hasRealYear else { return nil }
+        return Calendar.current.dateComponents([.year], from: birthday, to: Date()).year
+    }
+    
     var isBirthdayToday: Bool {
         let calendar = Calendar.current
         let todayComponents = calendar.dateComponents([.month, .day], from: Date())
@@ -72,7 +76,6 @@ extension Person {
             return nil
         }
         
-        // If this year's birthday has already passed, check for next year's.
         if nextBirthdayDate < today {
             nextBirthdayComponents.year = currentYear + 1
             if let nextYearBirthday = calendar.date(from: nextBirthdayComponents) {
@@ -86,7 +89,6 @@ extension Person {
     var daysUntilNextBirthday: Int {
         guard let nextBirthdayDate = nextBirthday else { return 0 }
         
-        // If it's their birthday today, the countdown is 0.
         if self.isBirthdayToday {
             return 0
         }

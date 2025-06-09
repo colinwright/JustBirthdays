@@ -3,8 +3,7 @@ import SwiftUI
 struct SearchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
-    
-    @FocusState private var isSearchFieldFocused: Bool
+    @State private var isSearchActive = false
 
     var body: some View {
         NavigationStack {
@@ -12,26 +11,16 @@ struct SearchView: View {
                 .navigationTitle("Search Birthdays")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .confirmationAction) {
                         Button("Done") {
                             dismiss()
                         }
                     }
                 }
-                .searchable(text: $searchText, prompt: "Search by name")
-                .focused($isSearchFieldFocused)
+                .searchable(text: $searchText, isPresented: $isSearchActive, prompt: "Search by name")
                 .onAppear {
-                    // This delay gives the UI time to settle before we request focus.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        isSearchFieldFocused = true
-                    }
+                    isSearchActive = true
                 }
         }
     }
-}
-
-#Preview {
-    SearchView()
-        .modelContainer(for: Person.self, inMemory: true)
-        .environmentObject(AppState())
 }

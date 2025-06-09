@@ -3,12 +3,6 @@ import SwiftUI
 import SwiftData
 import AppIntents
 
-struct PersonInfo: Identifiable, Hashable {
-    let id: UUID
-    let name: String
-}
-
-// --- The Provider struct is unchanged ---
 struct Provider: AppIntentTimelineProvider {
     let modelContainer: ModelContainer
     
@@ -26,8 +20,8 @@ struct Provider: AppIntentTimelineProvider {
 
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(), people: [
-            PersonInfo(id: UUID(), name: "John Appleseed"),
-            PersonInfo(id: UUID(), name: "Jane Doe")
+            PersonInfo(id: UUID(), name: "John Appleseed", daysUntilNextBirthday: 0, ageTurningToday: 30),
+            PersonInfo(id: UUID(), name: "Jane Doe", daysUntilNextBirthday: 5, ageTurningToday: nil)
         ], widgetKind: .today)
     }
 
@@ -52,15 +46,28 @@ struct Provider: AppIntentTimelineProvider {
         let filteredPeople: [Person]
         switch kind {
         case .today:
-            filteredPeople = allPeople.filter { $0.isBirthdayToday }.sorted { $0.name < $1.name }
-        case .upcoming:
             filteredPeople = allPeople
-                .filter { !$0.isBirthdayToday && $0.daysUntilNextBirthday <= 30 }
+                .filter { $0.isBirthdayToday }
+                .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        case .upcoming:
+            let appGroupID = "group.com.colinismyname.JustBirthdays"
+            let userDefaults = UserDefaults(suiteName: appGroupID)
+            let upcomingDaysLimit = userDefaults?.integer(forKey: "upcomingDaysLimit") ?? 30
+            
+            filteredPeople = allPeople
+                .filter { !$0.isBirthdayToday && $0.daysUntilNextBirthday > 0 && $0.daysUntilNextBirthday <= upcomingDaysLimit }
                 .sorted { $0.daysUntilNextBirthday < $1.daysUntilNextBirthday }
         }
         
-        return filteredPeople.map { PersonInfo(id: $0.id, name: $0.name) }
+        return filteredPeople.map { PersonInfo(id: $0.id, name: $0.name, daysUntilNextBirthday: $0.daysUntilNextBirthday, ageTurningToday: $0.ageTurningToday) }
     }
+}
+
+struct PersonInfo: Identifiable, Hashable {
+    let id: UUID
+    let name: String
+    let daysUntilNextBirthday: Int?
+    let ageTurningToday: Int?
 }
 
 struct SimpleEntry: TimelineEntry {
@@ -69,99 +76,143 @@ struct SimpleEntry: TimelineEntry {
     let widgetKind: WidgetKind
 }
 
-// --- All changes are in this view ---
 struct JustBirthdaysWidgetEntryView : View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if family != .systemSmall {
-                Text(title)
+        if family == .systemSmall {
+            smallWidgetBody
+        } else {
+            mediumAndLargeWidgetBody
+        }
+    }
+
+    @ViewBuilder
+    private var smallWidgetBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(widgetTitle)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+            
+            Spacer(minLength: 0)
+
+            if let firstPerson = entry.people.first {
+                Text(firstPerson.name)
                     .font(.headline)
+                    .fontWeight(.bold)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if entry.people.count > 1 {
+                    Text("and \(entry.people.count - 1) more")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text(emptyStateText)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                Divider()
             }
             
+            Spacer(minLength: 0)
+        }
+        .padding()
+    }
+    
+    @ViewBuilder
+    private var mediumAndLargeWidgetBody: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(widgetTitle)
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 12)
+
             if entry.people.isEmpty {
-                Text("None")
-                    .font(nameFont).bold()
+                emptyStateView
             } else {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(entry.people.prefix(peopleToShow)) { personInfo in
-                        if family == .systemSmall {
-                            HStack(alignment: .top, spacing: 5) {
-                                Text("•")
-                                    .font(nameFont)
-                                
-                                Text(personInfo.name)
-                                    .font(nameFont)
-                                    .bold()
-                                    .lineLimit(2)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                
-                                Spacer() // This pushes the bullet and name to the left.
-                            }
-                        } else {
+                        HStack(alignment: .firstTextBaseline) {
                             Text(personInfo.name)
-                                .font(nameFont)
-                                .bold()
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            Spacer()
+                            Text(contextualInfo(for: personInfo))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
                         }
                     }
                 }
                 
                 if entry.people.count > peopleToShow {
-                    Text("and \(entry.people.count - peopleToShow) more...")
+                    Text("and \(entry.people.count - peopleToShow) more")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .padding(.top, 2)
+                        .padding(.top, 8)
                 }
-            }
-            
-            // By putting the Spacer only here, it pushes all content up.
-            // This ensures the small widget's content starts at the top.
-            // The medium widget will naturally center itself due to the VStack's behavior.
-            if family == .systemSmall {
-                Spacer()
+                
+                Spacer(minLength: 0)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
     }
     
-    private var title: String {
-        switch entry.widgetKind {
-        case .today:
-            return "Today's Birthdays"
-        case .upcoming:
-            return "Upcoming Birthdays"
+    private var emptyStateView: some View {
+        VStack {
+            Spacer()
+            Image(systemName: entry.widgetKind == .today ? "gift" : "calendar")
+                .font(.largeTitle)
+                .foregroundStyle(.tertiary)
+            Text(emptyStateText)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    // MARK: - Computed Properties for Adaptive Layout
+
+    private var widgetTitle: String {
+        switch family {
+        case .systemSmall:
+            return entry.widgetKind == .today ? "Today" : "Upcoming"
+        default:
+            return entry.widgetKind == .today ? "Today's Birthdays" : "Upcoming Birthdays"
         }
     }
     
-    private var nameFont: Font {
-        switch family {
-        case .systemSmall:
-            return .caption
-        default:
-            return .subheadline
-        }
+    private var emptyStateText: String {
+        entry.widgetKind == .today ? "No birthdays today." : "No upcoming birthdays."
     }
     
     private var peopleToShow: Int {
         switch family {
-        case .systemSmall: return 3
-        case .systemMedium: return 4
-        default: return 8
+        case .systemMedium: return 2
+        case .systemLarge: return 9
+        default: return 5
         }
+    }
+    
+    private func contextualInfo(for person: PersonInfo) -> String {
+        if entry.widgetKind == .upcoming {
+            guard let days = person.daysUntilNextBirthday else { return "" }
+            return days == 1 ? "in 1 day" : "in \(days) days"
+        }
+        
+        if let age = person.ageTurningToday, age > 0 {
+            return "turning \(age)"
+        }
+        
+        return ""
     }
 }
 
-// --- The rest of the file is unchanged ---
-
 enum WidgetKind: String, AppEnum {
     case today, upcoming
+    
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Widget Type"
     static var caseDisplayRepresentations: [WidgetKind : DisplayRepresentation] = [
         .today: "Today's Birthdays",
@@ -175,12 +226,6 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
 
     @Parameter(title: "Widget Type", default: .today)
     var widgetKind: WidgetKind
-    
-    init() {}
-    
-    init(widgetKind: WidgetKind) {
-        self.widgetKind = widgetKind
-    }
 }
 
 struct JustBirthdaysWidget: Widget {
@@ -193,7 +238,7 @@ struct JustBirthdaysWidget: Widget {
         }
         .configurationDisplayName("Birthdays")
         .description("See today's or upcoming birthdays.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 

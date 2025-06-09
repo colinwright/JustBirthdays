@@ -1,61 +1,69 @@
-//
-//  ContentView.swift
-//  JustBirthdays
-//
-//  Created by Colin Wright on 6/6/25.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @EnvironmentObject private var appState: AppState
+    
+    @State private var showingAddSheet = false
+    @State private var showingSearchSheet = false
+    @State private var showingSettingsSheet = false // State for settings
+
+    @State private var selectedTab: Tab = .today
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        NavigationStack {
+            TabView(selection: $selectedTab) {
+                TodayView()
+                    .tabItem { Label("Today", systemImage: "gift.fill") }
+                    .tag(Tab.today)
+
+                UpcomingView()
+                    .tabItem { Label("Upcoming", systemImage: "calendar") }
+                    .tag(Tab.upcoming)
+
+                AllBirthdaysView()
+                    .tabItem { Label("All", systemImage: "person.3.fill") }
+                    .tag(Tab.all)
             }
+            .navigationTitle("Just Birthdays")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    HStack(spacing: 12) {
+                        Button(action: { showingAddSheet.toggle() }) {
+                            Image(systemName: "plus")
+                        }
+                        
+                        Button(action: { showingSearchSheet.toggle() }) {
+                            Image(systemName: "magnifyingglass")
+                        }
+
+                        // New button for Settings
+                        Button(action: { showingSettingsSheet.toggle() }) {
+                            Image(systemName: "gearshape.fill")
+                        }
+
+                        Button(action: toggleSortOrder) {
+                            Label("Sort", systemImage: appState.sortOrder == .chronological ? "calendar" : "a.circle.fill")
+                        }
                     }
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            .sheet(isPresented: $showingAddSheet) {
+                AddEditPersonView(person: Person(name: "", birthday: .now), isNew: true)
+            }
+            .sheet(isPresented: $showingSearchSheet) {
+                SearchView()
+            }
+            .sheet(isPresented: $showingSettingsSheet) {
+                SettingsView()
             }
         }
     }
-}
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+    private func toggleSortOrder() {
+        withAnimation {
+            appState.sortOrder = (appState.sortOrder == .chronological) ? .alphabetical : .chronological
+        }
+    }
 }

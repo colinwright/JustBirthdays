@@ -1,20 +1,19 @@
-//
-//  JustBirthdaysApp.swift
-//  JustBirthdays
-//
-//  Created by Colin Wright on 6/6/25.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct JustBirthdaysApp: App {
+    @StateObject private var appState = AppState()
+
     var sharedModelContainer: ModelContainer = {
+        let appGroupID = "group.com.colinismyname.JustBirthdays"
+
         let schema = Schema([
-            Item.self,
+            Person.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        
+        // This configuration tells SwiftData to store its database in the shared App Group.
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier(appGroupID))
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -28,5 +27,6 @@ struct JustBirthdaysApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        .environmentObject(appState)
     }
 }

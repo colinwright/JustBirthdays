@@ -14,6 +14,8 @@ final class Person {
     @Attribute(.externalStorage)
     var notes: String?
     
+    static let defaultYear = 1
+    
     init(
         name: String,
         birthday: Date,
@@ -33,13 +35,19 @@ final class Person {
 }
 
 extension Person {
-    // This is the corrected logic. It now ignores the year for the comparison.
+    var hasRealYear: Bool {
+        let year = Calendar.current.component(.year, from: birthday)
+        return year != Person.defaultYear
+    }
+
+    // This is the corrected implementation. It now properly ignores the year.
     var isBirthdayToday: Bool {
         let calendar = Calendar.current
         let todayComponents = calendar.dateComponents([.month, .day], from: Date())
         let birthdayComponents = calendar.dateComponents([.month, .day], from: birthday)
         
-        return todayComponents.month == birthdayComponents.month && todayComponents.day == birthdayComponents.day
+        return todayComponents.month == birthdayComponents.month &&
+               todayComponents.day == birthdayComponents.day
     }
 
     var birthMonthDay: Int {
@@ -52,21 +60,24 @@ extension Person {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
-        let components = calendar.dateComponents([.month, .day], from: birthday)
-        var nextBirthdayComponents = DateComponents()
-        nextBirthdayComponents.month = components.month
-        nextBirthdayComponents.day = components.day
-        
+        let birthdayComponents = calendar.dateComponents([.month, .day], from: birthday)
         let currentYear = calendar.component(.year, from: today)
+
+        var nextBirthdayComponents = DateComponents()
+        nextBirthdayComponents.month = birthdayComponents.month
+        nextBirthdayComponents.day = birthdayComponents.day
         nextBirthdayComponents.year = currentYear
         
-        guard let nextBirthdayDate = calendar.date(from: nextBirthdayComponents) else {
+        guard var nextBirthdayDate = calendar.date(from: nextBirthdayComponents) else {
             return nil
         }
         
-        if nextBirthdayDate < today && !self.isBirthdayToday {
-            nextBirthdayComponents.year! += 1
-            return calendar.date(from: nextBirthdayComponents)
+        // If this year's birthday has already passed, check for next year's.
+        if nextBirthdayDate < today {
+            nextBirthdayComponents.year = currentYear + 1
+            if let nextYearBirthday = calendar.date(from: nextBirthdayComponents) {
+                nextBirthdayDate = nextYearBirthday
+            }
         }
         
         return nextBirthdayDate
@@ -74,8 +85,15 @@ extension Person {
     
     var daysUntilNextBirthday: Int {
         guard let nextBirthdayDate = nextBirthday else { return 0 }
+        
+        // If it's their birthday today, the countdown is 0.
+        if self.isBirthdayToday {
+            return 0
+        }
+        
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
+        
         let components = calendar.dateComponents([.day], from: today, to: nextBirthdayDate)
         return components.day ?? 0
     }

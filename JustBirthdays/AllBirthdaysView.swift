@@ -31,8 +31,9 @@ struct AllBirthdaysView: View {
                         .onTapGesture {
                             personToEdit = person
                         }
-                        // This ensures consistent separator lines.
-                        .listRowSeparator(.visible)
+                        .alignmentGuide(.listRowSeparatorLeading) { _ in
+                            return 0
+                        }
                 }
                 .onDelete(perform: deletePeople)
             }
@@ -48,13 +49,5 @@ struct AllBirthdaysView: View {
         for person in peopleToDelete {
             modelContext.delete(person)
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        AllBirthdaysView()
-            .environmentObject(AppState())
-            .modelContainer(for: Person.self, inMemory: true)
     }
 }

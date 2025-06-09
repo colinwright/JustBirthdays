@@ -3,7 +3,6 @@ import SwiftUI
 struct PersonRowView: View {
     let person: Person
     
-    // Read the setting from AppStorage.
     @AppStorage("showYearInList") private var showYearInList = false
     
     var body: some View {
@@ -12,12 +11,11 @@ struct PersonRowView: View {
                 Text(person.name)
                     .font(.headline)
                 
-                // Now uses our setting to format the date.
                 Text(person.birthday, format: birthdayFormat)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            // ... (rest of the body is unchanged)
+
             Spacer()
             
             Text(daysUntilText)
@@ -29,7 +27,6 @@ struct PersonRowView: View {
     }
     
     private var daysUntilText: String {
-        // ...
         let days = person.daysUntilNextBirthday
         if days == 0 {
             return "Today"
@@ -41,7 +38,7 @@ struct PersonRowView: View {
     }
     
     private var birthdayFormat: Date.FormatStyle {
-        if showYearInList {
+        if showYearInList && person.hasRealYear {
             return .init().month(.wide).day().year()
         } else {
             return .init().month(.wide).day()

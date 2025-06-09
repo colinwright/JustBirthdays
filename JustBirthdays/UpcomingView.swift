@@ -2,17 +2,23 @@ import SwiftUI
 import SwiftData
 
 struct UpcomingView: View {
+    @EnvironmentObject private var appState: AppState
     @Query var people: [Person]
     @State private var personToEdit: Person?
     
-    // Read the setting from AppStorage.
     @AppStorage("upcomingDaysLimit") private var upcomingDaysLimit = 30
     
     private var upcomingBirthdays: [Person] {
-        people.filter {
-            !$0.isBirthdayToday && $0.daysUntilNextBirthday <= upcomingDaysLimit
+        let filtered = people.filter {
+            !$0.isBirthdayToday && $0.daysUntilNextBirthday > 0 && $0.daysUntilNextBirthday <= upcomingDaysLimit
         }
-        .sorted { $0.daysUntilNextBirthday < $1.daysUntilNextBirthday }
+        
+        switch appState.sortOrder {
+        case .chronological:
+            return filtered.sorted { $0.daysUntilNextBirthday < $1.daysUntilNextBirthday }
+        case .alphabetical:
+            return filtered.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        }
     }
     
     var body: some View {
@@ -23,11 +29,13 @@ struct UpcomingView: View {
                 description: Text("No birthdays in the next \(upcomingDaysLimit) days.")
             )
         } else {
-            // ... (rest of the body is unchanged)
             List(upcomingBirthdays) { person in
                 PersonRowView(person: person)
                     .onTapGesture {
                         personToEdit = person
+                    }
+                    .alignmentGuide(.listRowSeparatorLeading) { _ in
+                        return 0
                     }
             }
             .listStyle(.plain)

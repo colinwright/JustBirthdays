@@ -21,19 +21,14 @@ struct SettingsView: View {
                 }
                 
                 Section("Data Management") {
-                    Button("Export Birthdays...") {
-                        exportData()
-                    }
-                    
-                    Button("Import Birthdays...") {
-                        isShowingImporter = true
-                    }
+                    Button("Export Birthdays...", action: exportData)
+                    Button("Import Birthdays...", action: { isShowingImporter = true })
                 }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
             }
@@ -43,15 +38,13 @@ struct SettingsView: View {
                 contentType: .commaSeparatedText,
                 defaultFilename: "JustBirthdays_Export.csv"
             ) { result in
-                // Handle export result if necessary
                 documentToExport = nil
             }
             .fileImporter(
                 isPresented: $isShowingImporter,
-                allowedContentTypes: [.commaSeparatedText]
-            ) { result in
-                handleImport(result: result)
-            }
+                allowedContentTypes: [.commaSeparatedText],
+                onCompletion: handleImport
+            )
         }
     }
     
@@ -65,19 +58,15 @@ struct SettingsView: View {
         case .success(let url):
             let people = CSVManager.parseCSV(from: url)
             for person in people {
-                // To avoid duplicates, we could check if a person with the same name/birthday exists.
-                // For simplicity now, we just insert them all.
                 modelContext.insert(person)
             }
         case .failure(let error):
-            // Handle import error, e.g., show an alert
             print("Error importing file: \(error.localizedDescription)")
         }
     }
 }
 
-// A helper struct conforming to FileDocument to work with .fileExporter.
-struct CSVDocument: FileDocument {
+private struct CSVDocument: FileDocument {
     static var readableContentTypes: [UTType] = [.commaSeparatedText]
     var csvString: String
 
@@ -97,9 +86,4 @@ struct CSVDocument: FileDocument {
         let data = csvString.data(using: .utf8)!
         return FileWrapper(regularFileWithContents: data)
     }
-}
-
-#Preview {
-    SettingsView()
-        .modelContainer(for: Person.self, inMemory: true)
 }

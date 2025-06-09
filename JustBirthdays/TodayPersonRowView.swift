@@ -2,9 +2,7 @@ import SwiftUI
 
 struct TodayPersonRowView: View {
     let person: Person
-    
-    // The onEdit closure is no longer needed, as we'll go back to tapping the row.
-    
+        
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(person.name)
@@ -25,7 +23,7 @@ struct TodayPersonRowView: View {
             if (person.phoneNumber?.isEmpty ?? true) &&
                (person.email?.isEmpty ?? true) &&
                (person.socialMediaURL?.isEmpty ?? true) {
-                Text("No contact info")
+                Text("No contact info provided.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -35,7 +33,6 @@ struct TodayPersonRowView: View {
     }
 }
 
-// A new, reusable subview for a row with a copy button.
 private struct CopyableRow: View {
     let systemImage: String
     let text: String
@@ -46,7 +43,6 @@ private struct CopyableRow: View {
             Label(text, systemImage: systemImage)
             Spacer()
             Button(action: copyToClipboard) {
-                // The button changes to a checkmark briefly after copying.
                 Image(systemName: justCopied ? "checkmark" : "doc.on.doc")
             }
             .buttonStyle(.plain)
@@ -58,7 +54,7 @@ private struct CopyableRow: View {
         withAnimation {
             justCopied = true
         }
-        // Revert the checkmark back to the copy icon after 2 seconds.
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation {
                 justCopied = false

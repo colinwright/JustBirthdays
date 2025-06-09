@@ -21,10 +21,12 @@ struct TodayView: View {
             )
         } else {
             List(todaysBirthdays) { person in
-                // Restore the simple tap gesture for editing.
                 TodayPersonRowView(person: person)
                     .onTapGesture {
                         personToEdit = person
+                    }
+                    .alignmentGuide(.listRowSeparatorLeading) { _ in
+                        return 0
                     }
             }
             .listStyle(.plain)
@@ -32,12 +34,5 @@ struct TodayView: View {
                 AddEditPersonView(person: person, isNew: false)
             }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        TodayView()
-            .modelContainer(for: Person.self, inMemory: true)
     }
 }

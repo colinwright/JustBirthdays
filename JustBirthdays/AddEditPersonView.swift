@@ -37,25 +37,25 @@ struct AddEditPersonView: View {
                 }
                 
                 Section {
-                    VStack(spacing: 12) {
-                        Picker("Input Style", selection: $birthdayInputMode) {
-                            ForEach(BirthdayInputMode.allCases) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .onChange(of: birthdayInputMode) {
-                            focusedField = nil
-                        }
-                        
-                        if birthdayInputMode == .calendar {
-                            DatePicker("Date", selection: $person.birthday, displayedComponents: .date)
-                                .datePickerStyle(.graphical)
-                        } else {
-                            BirthdayTextFieldsView(birthday: $person.birthday, focusedField: $focusedField)
+                    Picker("Input Style", selection: $birthdayInputMode) {
+                        ForEach(BirthdayInputMode.allCases) { mode in
+                            Text(mode.rawValue).tag(mode)
                         }
                     }
-                    .padding(.vertical, 8)
+                    .pickerStyle(.segmented)
+                    .listRowSeparator(.hidden)
+                    .padding(.top, 6) // Adds space above the picker
+                    .onChange(of: birthdayInputMode) {
+                        focusedField = nil
+                    }
+                    
+                    if birthdayInputMode == .calendar {
+                        DatePicker("Date", selection: $person.birthday, displayedComponents: .date)
+                            .datePickerStyle(.graphical)
+                    } else {
+                        BirthdayTextFieldsView(birthday: $person.birthday, focusedField: $focusedField)
+                            .padding(.vertical, 12)
+                    }
                 } header: {
                     Text("Birthday")
                 } footer: {
@@ -70,9 +70,14 @@ struct AddEditPersonView: View {
                             get: { person.phoneNumber ?? "" },
                             set: { person.phoneNumber = $0.isEmpty ? nil : $0 }
                         ))
-                        .keyboardType(.phonePad)
+                        .keyboardType(.numbersAndPunctuation)
                         .multilineTextAlignment(.trailing)
                         .focused($focusedField, equals: .phone)
+                        .onChange(of: person.phoneNumber) { _, newValue in
+                            let allowedChars = CharacterSet(charactersIn: "0123456789-")
+                            let filtered = newValue?.components(separatedBy: allowedChars.inverted).joined()
+                            person.phoneNumber = filtered
+                        }
                         .onSubmit { focusedField = .email }
                     } label: { Label("Phone", systemImage: "phone.fill") }
                     

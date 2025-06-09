@@ -12,7 +12,7 @@ enum Tab: Identifiable, CaseIterable {
         case .upcoming:
             return "Upcoming"
         case .all:
-            return "All Birthdays"
+            return "All"
         }
     }
 }

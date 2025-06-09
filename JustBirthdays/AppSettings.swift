@@ -1,6 +1,11 @@
 import SwiftUI
 
+// This extension provides a clean way to reference our shared user defaults.
+extension UserDefaults {
+    static let appGroup = UserDefaults(suiteName: "group.com.colinismyname.JustBirthdays")!
+}
+
 class AppSettings: ObservableObject {
-    @AppStorage("upcomingDaysLimit") var upcomingDaysLimit = 30
-    @AppStorage("showYearInList") var showYearInList = false
+    @AppStorage("upcomingDaysLimit", store: .appGroup) var upcomingDaysLimit = 30
+    @AppStorage("showYearInList", store: .appGroup) var showYearInList = false
 }

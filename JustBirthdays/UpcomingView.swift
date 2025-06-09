@@ -6,7 +6,7 @@ struct UpcomingView: View {
     @Query var people: [Person]
     @State private var personToEdit: Person?
     
-    @AppStorage("upcomingDaysLimit") private var upcomingDaysLimit = 30
+    @AppStorage("upcomingDaysLimit", store: .appGroup) private var upcomingDaysLimit = 30
     
     private var upcomingBirthdays: [Person] {
         let filtered = people.filter {

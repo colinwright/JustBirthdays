@@ -3,7 +3,7 @@ import SwiftUI
 struct PersonRowView: View {
     let person: Person
     
-    @AppStorage("showYearInList") private var showYearInList = false
+    @AppStorage("showYearInList", store: .appGroup) private var showYearInList = false
     
     var body: some View {
         HStack {

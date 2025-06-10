@@ -7,7 +7,7 @@ struct Provider: AppIntentTimelineProvider {
     let modelContainer: ModelContainer
     
     init() {
-        let appGroupID = "group.com.colinismyname.JustBirthdays"
+        let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
         let schema = Schema([Person.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, groupContainer: .identifier(appGroupID))
         
@@ -50,7 +50,7 @@ struct Provider: AppIntentTimelineProvider {
                 .filter { $0.isBirthdayToday }
                 .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         case .upcoming:
-            let appGroupID = "group.com.colinismyname.JustBirthdays"
+            let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
             let userDefaults = UserDefaults(suiteName: appGroupID)
             let upcomingDaysLimit = userDefaults?.integer(forKey: "upcomingDaysLimit") ?? 30
             

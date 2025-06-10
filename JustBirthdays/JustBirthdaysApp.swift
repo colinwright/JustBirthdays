@@ -6,7 +6,7 @@ struct JustBirthdaysApp: App {
     @StateObject private var appState = AppState()
 
     var sharedModelContainer: ModelContainer = {
-        let appGroupID = "group.com.colinismyname.JustBirthdays"
+        let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
 
         let schema = Schema([
             Person.self,

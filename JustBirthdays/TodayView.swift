@@ -17,7 +17,6 @@ struct TodayView: View {
             ContentUnavailableView(
                 "No Birthdays Today",
                 systemImage: "gift",
-                description: Text("Check back tomorrow!")
             )
         } else {
             List(todaysBirthdays) { person in

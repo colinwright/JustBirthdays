@@ -44,7 +44,7 @@ struct AddEditPersonView: View {
                     }
                     .pickerStyle(.segmented)
                     .listRowSeparator(.hidden)
-                    .padding(.top, 6) // Adds space above the picker
+                    .padding(.top, 6)
                     .onChange(of: birthdayInputMode) {
                         focusedField = nil
                     }
@@ -151,11 +151,13 @@ struct AddEditPersonView: View {
         if isNew {
             modelContext.insert(person)
         }
+        WidgetManager.reloadTimelines()
         dismiss()
     }
     
     private func deletePerson() {
         modelContext.delete(person)
+        WidgetManager.reloadTimelines()
         dismiss()
     }
 }

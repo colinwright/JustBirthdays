@@ -4,7 +4,7 @@ import SwiftData
 import AppIntents
 
 struct Provider: AppIntentTimelineProvider {
-    let modelContainer: ModelContainer
+    let modelContainer: ModelContainer?
     
     init() {
         let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
@@ -14,7 +14,8 @@ struct Provider: AppIntentTimelineProvider {
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [config])
         } catch {
-            fatalError("Failed to create container for widget: \(error)")
+            print("Failed to create container for widget: \(error)")
+            modelContainer = nil
         }
     }
 
@@ -22,26 +23,47 @@ struct Provider: AppIntentTimelineProvider {
         SimpleEntry(date: Date(), people: [
             PersonInfo(id: UUID(), name: "John Appleseed", daysUntilNextBirthday: 0, ageTurningToday: 30),
             PersonInfo(id: UUID(), name: "Jane Doe", daysUntilNextBirthday: 5, ageTurningToday: nil)
-        ], widgetKind: .today)
+        ], widgetKind: .today, upcomingDaysLimit: 30)
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        let people = await fetchPeople(for: configuration.widgetKind)
-        return SimpleEntry(date: Date(), people: people, widgetKind: configuration.widgetKind)
+        guard let container = modelContainer else {
+            return SimpleEntry(date: .now, people: [], widgetKind: configuration.widgetKind, upcomingDaysLimit: 30)
+        }
+        
+        let limit = fetchUpcomingDaysLimit()
+        let people = await fetchPeople(from: container, for: configuration.widgetKind, upcomingDaysLimit: limit)
+        return SimpleEntry(date: Date(), people: people, widgetKind: configuration.widgetKind, upcomingDaysLimit: limit)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        let people = await fetchPeople(for: configuration.widgetKind)
-        let entry = SimpleEntry(date: Date(), people: people, widgetKind: configuration.widgetKind)
+        guard let container = modelContainer else {
+            let entry = SimpleEntry(date: .now, people: [], widgetKind: configuration.widgetKind, upcomingDaysLimit: 30)
+            let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: .now)!
+            return Timeline(entries: [entry], policy: .after(nextUpdate))
+        }
+
+        let limit = fetchUpcomingDaysLimit()
+        let people = await fetchPeople(from: container, for: configuration.widgetKind, upcomingDaysLimit: limit)
+        let entry = SimpleEntry(date: Date(), people: people, widgetKind: configuration.widgetKind, upcomingDaysLimit: limit)
         
         let nextUpdateDate = Calendar.current.startOfDay(for: Date()).addingTimeInterval(60*60*24)
         return Timeline(entries: [entry], policy: .after(nextUpdateDate))
     }
     
+    private func fetchUpcomingDaysLimit() -> Int {
+        let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
+        guard let userDefaults = UserDefaults(suiteName: appGroupID) else {
+            return 30
+        }
+        let savedLimit = userDefaults.integer(forKey: "upcomingDaysLimit")
+        return savedLimit > 0 ? savedLimit : 30
+    }
+    
     @MainActor
-    private func fetchPeople(for kind: WidgetKind) -> [PersonInfo] {
+    private func fetchPeople(from container: ModelContainer, for kind: WidgetKind, upcomingDaysLimit: Int) -> [PersonInfo] {
         let descriptor = FetchDescriptor<Person>()
-        guard let allPeople = try? modelContainer.mainContext.fetch(descriptor) else { return [] }
+        guard let allPeople = try? container.mainContext.fetch(descriptor) else { return [] }
 
         let filteredPeople: [Person]
         switch kind {
@@ -50,10 +72,6 @@ struct Provider: AppIntentTimelineProvider {
                 .filter { $0.isBirthdayToday }
                 .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         case .upcoming:
-            let appGroupID = "group.com.colinismyname.JustBirthdaysApp"
-            let userDefaults = UserDefaults(suiteName: appGroupID)
-            let upcomingDaysLimit = userDefaults?.integer(forKey: "upcomingDaysLimit") ?? 30
-            
             filteredPeople = allPeople
                 .filter { !$0.isBirthdayToday && $0.daysUntilNextBirthday > 0 && $0.daysUntilNextBirthday <= upcomingDaysLimit }
                 .sorted { $0.daysUntilNextBirthday < $1.daysUntilNextBirthday }
@@ -74,6 +92,7 @@ struct SimpleEntry: TimelineEntry {
     let date: Date
     let people: [PersonInfo]
     let widgetKind: WidgetKind
+    let upcomingDaysLimit: Int
 }
 
 struct JustBirthdaysWidgetEntryView : View {
@@ -173,8 +192,6 @@ struct JustBirthdaysWidgetEntryView : View {
         .frame(maxWidth: .infinity)
     }
     
-    // MARK: - Computed Properties for Adaptive Layout
-
     private var widgetTitle: String {
         switch family {
         case .systemSmall:

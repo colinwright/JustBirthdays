@@ -41,6 +41,11 @@ struct AllBirthdaysView: View {
             .sheet(item: $personToEdit) { person in
                 AddEditPersonView(person: person, isNew: false)
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    EditButton()
+                }
+            }
         }
     }
     
@@ -49,5 +54,7 @@ struct AllBirthdaysView: View {
         for person in peopleToDelete {
             modelContext.delete(person)
         }
+        
+        WidgetManager.reloadTimelines()
     }
 }

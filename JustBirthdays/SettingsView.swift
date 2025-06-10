@@ -2,18 +2,33 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-// A simple, reusable view for the confirmation message.
-struct ConfirmationMessageView: View {
-    let message: String
-    
-    var body: some View {
-        Text(message)
-            .font(.headline)
-            .padding()
-            .background(.ultraThickMaterial)
-            .cornerRadius(12)
-            .shadow(radius: 5)
+// A wrapper for UIActivityViewController to be used in SwiftUI.
+private struct ShareSheet: UIViewControllerRepresentable {
+    let url: URL
+    var onComplete: (Result<Void, Error>) -> Void
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+        controller.completionWithItemsHandler = { _, completed, _, error in
+            if let error = error {
+                onComplete(.failure(error))
+            } else if completed {
+                onComplete(.success(()))
+            }
+        }
+        return controller
     }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+// A helper struct to make the URL identifiable for the .sheet modifier.
+private struct ShareableURL: Identifiable {
+    let id = UUID()
+    let url: URL
 }
 
 struct SettingsView: View {
@@ -23,10 +38,10 @@ struct SettingsView: View {
     
     @Query var allPeople: [Person]
     
-    @State private var documentToExport: CSVDocument?
     @State private var isShowingImporter = false
     @State private var importError: Error?
     @State private var confirmationMessage: String?
+    @State private var shareableURL: ShareableURL?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -37,10 +52,14 @@ struct SettingsView: View {
                         Toggle("Show year in birthday lists", isOn: $settings.showYearInList)
                     }
                     
-                    Section("Data Management") {
+                    Section {
                         Button("Export Birthdays...", action: exportData)
                             .disabled(allPeople.isEmpty)
                         Button("Import Birthdays...", action: { isShowingImporter = true })
+                    } header: {
+                        Text("Data Management")
+                    } footer: {
+                        Text("After tapping Export, choose 'Save to Files' to save the CSV to your device.")
                     }
                 }
                 .navigationTitle("Settings")
@@ -50,24 +69,19 @@ struct SettingsView: View {
                         Button("Done") { dismiss() }
                     }
                 }
-                .fileExporter(
-                    isPresented: Binding(
-                        get: { documentToExport != nil },
-                        set: { if !$0 { documentToExport = nil } }
-                    ),
-                    document: documentToExport,
-                    contentType: .commaSeparatedText,
-                    defaultFilename: "JustBirthdays_Export.csv"
-                ) { result in
-                    if case .success = result {
-                        showConfirmationMessage("Successfully exported birthdays.")
-                    }
-                }
                 .fileImporter(
                     isPresented: $isShowingImporter,
                     allowedContentTypes: [.commaSeparatedText],
                     onCompletion: handleImport
                 )
+                .sheet(item: $shareableURL) { item in
+                    ShareSheet(url: item.url) { result in
+                        if case .success = result {
+                            showConfirmationMessage("Successfully exported birthdays.")
+                        }
+                        try? FileManager.default.removeItem(at: item.url)
+                    }
+                }
                 .alert(
                     "Import Failed",
                     isPresented: Binding(
@@ -81,7 +95,6 @@ struct SettingsView: View {
                 }
             }
             
-            // Display the confirmation message when it's set.
             if let message = confirmationMessage {
                 ConfirmationMessageView(message: message)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -93,7 +106,17 @@ struct SettingsView: View {
     
     private func exportData() {
         let csvString = CSVManager.generateCSV(from: allPeople)
-        documentToExport = CSVDocument(csvString: csvString)
+        
+        let tempDir = FileManager.default.temporaryDirectory
+        let fileName = "JustBirthdays_Export.csv"
+        let fileURL = tempDir.appendingPathComponent(fileName)
+
+        do {
+            try csvString.write(to: fileURL, atomically: true, encoding: .utf8)
+            self.shareableURL = ShareableURL(url: fileURL)
+        } catch {
+            print("Failed to write CSV to temp file: \(error)")
+        }
     }
     
     private func handleImport(result: Result<URL, Error>) {
@@ -130,23 +153,15 @@ struct SettingsView: View {
     }
 }
 
-private struct CSVDocument: FileDocument {
-    static var readableContentTypes: [UTType] = [.commaSeparatedText]
-    var csvString: String
-
-    init(csvString: String) {
-        self.csvString = csvString
-    }
-
-    init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-        self.csvString = String(decoding: data, as: UTF8.self)
-    }
-
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        let data = csvString.data(using: .utf8)!
-        return FileWrapper(regularFileWithContents: data)
+struct ConfirmationMessageView: View {
+    let message: String
+    
+    var body: some View {
+        Text(message)
+            .font(.headline)
+            .padding()
+            .background(.ultraThickMaterial)
+            .cornerRadius(12)
+            .shadow(radius: 5)
     }
 }
